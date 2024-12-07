@@ -179,6 +179,7 @@ void Dialog::searchReservation(const QString &reservationID)
 #include <QSqlQuery>
 #include <QSqlError>
 #include <QDebug>
+#include"arduinoo.h"
 
 Dialog::Dialog(QWidget *parent) :
     QDialog(parent),
@@ -190,9 +191,9 @@ Dialog::Dialog(QWidget *parent) :
     qDebug() << "Interface Dialog initialisée avec succès.";
 
     // Vérifier si 'arduino' est correctement initialisé avant de l'utiliser
-    if (arduino->getserial() && arduino->getserial()->isOpen()) {
+    if (arduino->getSerial() && arduino->getSerial()->isOpen()) {
         qDebug() << "Connexion à Arduino activée.";
-        connect(arduino->getserial(), &QSerialPort::readyRead, this, &Dialog::readFromArduino);
+        connect(arduino->getSerial(), &QSerialPort::readyRead, this, &Dialog::readFromArduino);
     } else {
         qDebug() << "Erreur : Arduino non initialisé ou port série non valide.";
     }
@@ -207,13 +208,13 @@ Dialog::~Dialog()
 
 void Dialog::readFromArduino() {
     // Vérifier si le port série est disponible et ouvert
-    if (!arduino->getserial() || !arduino->getserial()->isOpen()) {
+    if (!arduino->getSerial() || !arduino->getSerial()->isOpen()) {
         qDebug() << "Erreur : Port série non disponible.";
         return;
     }
 
     // Lire les données envoyées par Arduino
-    QByteArray data = arduino->read_from_arduino();
+    QByteArray data = arduino->receiveDataFromArduino();
     if (!data.isEmpty()) {
         QString receivedText = QString::fromUtf8(data).trimmed();  // Nettoyer les espaces et retours à la ligne
 

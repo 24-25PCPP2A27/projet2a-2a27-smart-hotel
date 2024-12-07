@@ -80,6 +80,7 @@ private slots:
 
     void on_login_2_clicked();
     void on_menu_reservation_clicked();
+    void on_menu_fournisseur_clicked();
 
 private:
     Ui::MainWindow *ui;

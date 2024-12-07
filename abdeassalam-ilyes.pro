@@ -13,11 +13,14 @@ SOURCES += \
     connection.cpp \
     dialog.cpp \
     employe.cpp \
+    fournisseur.cpp \
     gestion__reservation.cpp \
+    gestiondefournisseur.cpp \
     logviewer.cpp \
     main.cpp \
     mainwindow.cpp \
     nextpage.cpp \
+    qrcodedialog.cpp \
     reservation.cpp \
     stat_combo.cpp \
 Qrcode.cpp
@@ -29,10 +32,13 @@ HEADERS += \
     connection.h \
     dialog.h \
     employe.h \
+    fournisseur.h \
     gestion__reservation.h \
+    gestiondefournisseur.h \
     logviewer.h \
     mainwindow.h \
     nextpage.h \
+    qrcodedialog.h \
     reservation.h \
     stat_combo.h \
 Qrcode.hpp
@@ -40,7 +46,9 @@ Qrcode.hpp
 FORMS += \
     dialog.ui \
     gestion__reservation.ui \
+    gestiondefournisseur.ui \
     mainwindow.ui \
+    qrcodedialog.ui \
     stat_combo.ui
 
 # Default rules for deployment.

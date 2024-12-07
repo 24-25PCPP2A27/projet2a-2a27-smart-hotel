@@ -1,66 +1,110 @@
 #include "arduinoo.h"
-#include <QSerialPort>
-#include <QSerialPortInfo>
-#include <QDebug>  // Ajouter cet en-tête
 
+// Constructor
 Arduino::Arduino()
+    : serial(new QSerialPort),
+      arduinoPortName(""),
+      arduinoIsAvailable(false),
+      dataBuffer("")
 {
-    serial = new QSerialPort();
-    bool portTrouve = false;
+}
 
-    // Tentative de détection automatique des ports
-    foreach (const QSerialPortInfo &info, QSerialPortInfo::availablePorts()) {
-        if (info.vendorIdentifier() == 0x2341) {  // Exemple : ID de l'Arduino Uno
-            serial->setPort(info);
-            portTrouve = true;
-            qDebug() << "Port trouvé automatiquement : " << info.portName();
-            break;
+// Destructor
+Arduino::~Arduino()
+{
+    if (serial->isOpen())
+        serial->close();
+    delete serial;
+}
+
+// Connect to Arduino
+int Arduino::connectToArduino()
+{
+    foreach (const QSerialPortInfo &serialPortInfo, QSerialPortInfo::availablePorts()) {
+        if (serialPortInfo.hasVendorIdentifier() && serialPortInfo.hasProductIdentifier()) {
+            if (serialPortInfo.vendorIdentifier() == vendorID &&
+                serialPortInfo.productIdentifier() == productID) {
+                arduinoIsAvailable = true;
+                arduinoPortName = serialPortInfo.portName();
+                break;
+            }
         }
     }
 
-    // Si aucun port détecté automatiquement, forcer l'utilisation de "COM10"
-    if (!portTrouve) {
-        qDebug() << "Aucun port détecté automatiquement. Tentative d'utilisation de COM10.";
-        serial->setPortName("COM10");  // Forcer l'utilisation de COM10
-    }
-
-    // Ouverture du port série
-    if (!serial->isOpen()) {
-        if (!serial->open(QIODevice::ReadWrite)) {
-            qDebug() << "Impossible d'ouvrir le port série. Code d'erreur: " << serial->error();
+    if (arduinoIsAvailable) {
+        serial->setPortName(arduinoPortName);
+        if (serial->open(QSerialPort::ReadWrite)) {
+            configureSerialPort();
+            qDebug() << "Connected to Arduino on port:" << arduinoPortName;
+            return 0; // Success
         } else {
-            qDebug() << "Port série ouvert avec succès : " << serial->portName();
+            qDebug() << "Failed to open serial port:" << serial->errorString();
+            return 1; // Port open failure
         }
     }
 
-    // Configuration du port série
+    qDebug() << "Arduino not found. Check connection or device IDs.";
+    return -1; // Arduino not available
+}
+
+// Disconnect from Arduino
+int Arduino::disconnectFromArduino()
+{
+    if (serial->isOpen()) {
+        serial->close();
+        qDebug() << "Disconnected from Arduino.";
+        return 0; // Success
+    }
+    qDebug() << "No open connection to Arduino.";
+    return 1; // Failure
+}
+
+// Send data to Arduino
+int Arduino::sendDataToArduino(const QString &data)
+{
+    if (serial->isWritable()) {
+        serial->write(data.toUtf8());
+        return 0; // Success
+    } else {
+        qDebug() << "Failed to write to Arduino!";
+        return 1; // Write failure
+    }
+}
+
+// Receive data from Arduino
+QByteArray Arduino::receiveDataFromArduino()
+{
+    if (serial->isReadable()) {
+        dataBuffer = serial->readAll();
+    }
+    return dataBuffer;
+}
+
+// Display message on Arduino LCD
+int Arduino::showMessageOnLCD(const QString &message)
+{
+    QByteArray data = message.toUtf8();
+    return sendDataToArduino(data);
+}
+
+// Get Arduino port name
+QString Arduino::getPortName() const
+{
+    return arduinoPortName;
+}
+
+// Get serial object
+QSerialPort* Arduino::getSerial() const
+{
+    return serial;
+}
+
+// Configure the serial port
+void Arduino::configureSerialPort()
+{
     serial->setBaudRate(QSerialPort::Baud9600);
     serial->setDataBits(QSerialPort::Data8);
     serial->setParity(QSerialPort::NoParity);
     serial->setStopBits(QSerialPort::OneStop);
     serial->setFlowControl(QSerialPort::NoFlowControl);
-}
-
-
-Arduino::~Arduino()
-{
-    if (serial->isOpen()) {
-        serial->close();
-    }
-    delete serial;
-}
-
-QSerialPort* Arduino::getserial()
-{
-    return serial;
-}
-
-QByteArray Arduino::read_from_arduino()
-{
-    return serial->readAll();  // Retourne toutes les données lues depuis Arduino
-}
-
-void Arduino::write_to_arduino(const QByteArray &data)
-{
-    serial->write(data);  // Envoie des données à Arduino
 }

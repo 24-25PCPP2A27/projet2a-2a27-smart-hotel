@@ -17,6 +17,8 @@
 #include "Qrcode.hpp"
 #include "ui_gestion__reservation.h"
 #include "gestion__reservation.h"
+#include "ui_gestiondefournisseur.h"
+#include "gestiondefournisseur.h"
 
 Employe e;
 using namespace  QtCharts;
@@ -298,6 +300,13 @@ void MainWindow::on_menu_reservation_clicked()
 {
     gestion__reservation *gest_res = new gestion__reservation(this);
     gest_res->show();
+    this->hide();
+}
+
+void MainWindow::on_menu_fournisseur_clicked()
+{
+    gestiondefournisseur *gest_fou = new gestiondefournisseur(this);
+    gest_fou->show();
     this->hide();
 }
 
