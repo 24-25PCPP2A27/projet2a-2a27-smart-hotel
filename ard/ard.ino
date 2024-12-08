@@ -1,5 +1,5 @@
 // Define pin for the buzzer
-const int buzzerPin = 10; // Connect the buzzer to pin 8
+const int buzzerPin = 11; // Connect the buzzer to pin 8
 
 void setup() {
     // Initialize the buzzer pin as output
